@@ -5,6 +5,7 @@ class Data(object):
     
     @property
     def train_df(self):
+        print("path:", DATA_PATH+'MURA-v1.1/train_image_paths.csv')
         # read csv
         train_df = pd.read_csv(DATA_PATH+'MURA-v1.1/train_image_paths.csv', header=None, names=['FilePath'])
         # extract Label, BodyPart, StudyType from path of image
