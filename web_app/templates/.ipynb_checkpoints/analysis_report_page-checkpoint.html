@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title></title>
+ <meta charset="utf-8" />
+</head>
+<body> 
+<div class="bd-example" align="middle">
+
+<img src= "{{ url_for('static', filename=filepath_image_original) }}", alt="Original preprocessed maybe image">
+<img src= "{{ url_for('static', filename=filepath_image_bounding_box) }}", alt="Bounding box image">
+<img src= "{{ url_for('static', filename=filepath_image_heat_map) }}", alt="Heat map overlayed image">
+ <center> Anomality probability : {{probability}}% </center>
+    <h2><center> Report: {{message}} </center></h2>
+    
+    
+    
+    
+    
+                                            
+    
+    
+        
+</div>
+</body>
+</html>
+
+
+

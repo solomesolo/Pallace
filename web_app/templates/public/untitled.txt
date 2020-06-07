@@ -1,0 +1,4 @@
+<img src= "{{ url_for('static', filename=filepath_image_heat_map) }}", alt="Heat map overlayed image">    
+
+# 
+<img src= "{{ url_for('static', filename=filepath_image_bounding_box) }}", alt="Bounding box image">

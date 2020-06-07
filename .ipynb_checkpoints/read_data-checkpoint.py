@@ -5,7 +5,6 @@ class Data(object):
     
     @property
     def train_df(self):
-        print("path:", DATA_PATH+'MURA-v1.1/train_image_paths.csv')
         # read csv
         train_df = pd.read_csv(DATA_PATH+'MURA-v1.1/train_image_paths.csv', header=None, names=['FilePath'])
         # extract Label, BodyPart, StudyType from path of image
@@ -27,6 +26,19 @@ class Data(object):
         # add prefix path to dataset to images paths
         valid_df['FilePath'] = valid_df['FilePath'].apply(lambda x: DATA_PATH+x)
         return valid_df
+    
+        
+    @property
+    def pallace_train_df(self):
+        # read csv
+        train_df = pd.read_csv(PALLACE_LABELS_PATH)#, header=None)#, names=['FilePath'])
+        return train_df
+
+    @property
+    def pallace_valid_df(self):
+        valid_df = pd.read_csv(PALLACE_LABELS_PATH)#, header=None)#, names=['FilePath'])
+        return valid_df
+    
 
     @property
     def train_labels_data(self):

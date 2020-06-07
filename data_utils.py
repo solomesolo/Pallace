@@ -8,38 +8,44 @@ import pandas as pd
 import random
 
 from config import INPUT_SIZE
+from web_app.config import INPUT_SIZE as PREDICT_INPUT_SIZE, DEVICE
 
 import threading
 from tqdm import tqdm
 tqdm.pandas()
 
 
-# def _load_image_from_df_2(row):
-#     img = cv2.imread(row['FilePath'], 1)
+train_transform = transforms.Compose([
+            transforms.Resize(INPUT_SIZE),
+#             transforms.RandomCrop(INPUT_SIZE),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomAffine(30, translate=None, scale=(0.95,1.3), resample=False, fillcolor=0), # 30 is rotation
+            transforms.ColorJitter(brightness=0.2),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
 
-#     img = Preprocessing(img)        
-#     img = Image.fromarray(img)
-
-#     label = row['Label']
-#     inputs.append(img)
-#     labels.append(label)
-#     if len(inputs) % 100 == 0:
-#         print("images loaded:", len(inputs))
-    
-# def apply_wrapper(df):
-#     return df.apply(_load_image_from_df_2, axis=1)
-
+val_transform = transforms.Compose([
+            transforms.Resize(INPUT_SIZE),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
 
 class MuraDataset(torch.utils.data.Dataset):
-    def __init__(self, df, transform=None):
+    def __init__(self, df, is_train=False):
+        if is_train:
+            self.transform = train_transform
+        else:
+            self.transform = val_transform
         
         # SAMPLING FOR DEBUG
-        df = df.sample(int(df.shape[0]/40))
+#         df = df.sample(int(df.shape[0]/40))
         
         
         self.df=df
-        self.transform=transform
         self.to_augment = True
+        
+#         print("df.head():", df.head())
         
         # read images to memory
         self.inputs = []
@@ -98,16 +104,19 @@ class MuraDataset(torch.utils.data.Dataset):
             print("Dataset was shuffled")
     
     def _load_image_from_df_single(self, row):
-        img = cv2.imread(row['FilePath'], 1)
-        import sys
-
+        try:
+            # some images from Pallace dataset downloaded from LabelBox with errors 
+            img = cv2.imread(row['FilePath'], 1)
 #         img = Preprocessing_single14(img)        
-        img = Preprocessing(img)        
-        img = Image.fromarray(img)
+            img = Preprocessing(img)        
+            img = Image.fromarray(img)
 
-        label = row['Label']
-        self.inputs.append(img)
-        self.labels.append(label)    
+            label = row['Label']
+            self.inputs.append(img)
+            self.labels.append(label)    
+        except:
+            print("row:", row, "type(img):", type(img))
+            print("row['FilePath']:", row['FilePath'])
         
     
 #     def _apply_wrapper(self, i_worker, df_part):
@@ -132,7 +141,7 @@ class MuraDataset(torch.utils.data.Dataset):
 # #         self.labels.append(label)
 #         # Threading writing
 #         self.list_thread_outputs['inputs'][i_worker].append(img)
-#         self.list_thread_outputs['labels'][i_worker].append(label)
+#         self.l￼ist_thread_outputs['labels'][i_worker].append(label)
         
 #         len_list_worker = len(self.list_thread_outputs['inputs'][i_worker])
 #         if i_worker == 0 and len_list_worker % 1000 == 0:
@@ -166,12 +175,35 @@ class MuraDataset(torch.utils.data.Dataset):
         return img, label
     
 
+    
+def read_preprocess_image(path):
+    # read the image
+    image = cv2.imread(path, 1)
+    # preprocess image (crop to RoI and scale)
+    img = Preprocessing(image, input_size=PREDICT_INPUT_SIZE)        
+
+    # RGB from Grayscale image
+    image = np.zeros((img.shape[0], img.shape[1], 3),dtype=np.uint8)
+    for i in range(3):
+        image[:,:,i]= np.asarray(img)
+    
+    # transform image to put into network
+    image_pil = Image.fromarray(image)
+    predict_transform = transforms.Compose([
+            transforms.Resize(PREDICT_INPUT_SIZE),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+    image_tensor = predict_transform(image_pil).to(DEVICE)
+    image_tensor = torch.unsqueeze(image_tensor, 0)
+    
+    return image, image_tensor
+    
 
 from skimage import filters
 from skimage.measure import label,regionprops
-Window=INPUT_SIZE
 
-def Preprocessing(image):
+def Preprocessing(image, input_size=INPUT_SIZE):
     if len(image.shape)==2:
         pass
     else:
@@ -224,9 +256,9 @@ def Preprocessing(image):
 
     image4=255-image3
     image3=Image.fromarray(image3)
-    image3=image3.resize((Window,Window))
+    image3=image3.resize((input_size,input_size))
 #     image4=Image.fromarray(image4)
-#     image4=image4.resize((Window,Window))
+#     image4=image4.resize((input_size,input_size))
     
     return np.asarray(image3)#,np.asarray(image4)]
 

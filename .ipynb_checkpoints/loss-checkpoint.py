@@ -18,6 +18,12 @@ class Loss(nn.modules.Module):
         Wt1_valid = total_negative_images_valid/(total_negative_images_valid + total_positive_images_valid)
         Wt0_valid = total_positive_images_valid/(total_negative_images_valid + total_positive_images_valid)
 
+#         print("total_positive_images_train:", total_positive_images_train)
+#         print("total_negative_images_train:", total_negative_images_train)
+#         print("total_positive_images_valid:", total_positive_images_valid)
+#         print("total_negative_images_valid:", total_negative_images_valid)
+        
+        
         Wt = dict()
         Wt_train={}
         Wt_valid={}

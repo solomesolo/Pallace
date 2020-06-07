@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title></title>
+ <meta charset="utf-8" />
+</head>
+<body> 
+<div class="bd-example" align="middle">
+
+
+ <h4><center> Anomality probability : {{probability}}% </center> </h4>
+    <h2><center> {{message}} </center></h2>
+<img src= "{{ url_for('static', filename=filepath_image_original) }}", alt="Original preprocessed maybe image">
+<img src= "{{ url_for('static', filename=filepath_image_heat_map) }}", alt="Heat map overlayed image">    
+
+    <br>
+    <h2><center> <a href='/'> Upload new X-RAY</a></center></h2>
+    
+    
+    
+        
+</div>
+</body>
+</html>
+
+
+
