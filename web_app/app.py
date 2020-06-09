@@ -69,34 +69,33 @@ def upload_image():
                 filename = secure_filename(image.filename)
                 now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = filename.split('.')[0] + '_' + now +'.' + filename.split('.')[1]
-                print(" make image dir:", filename.split('.')[0])
                 os.makedirs(app.config["IMAGE_UPLOADS"] +'/'+ filename.split('.')[0])
                 file_path = os.path.join(app.config["IMAGE_UPLOADS"], filename.split('.')[0], filename)
-                print("type of input:", type(image))
                 image.save(file_path)
                 print("Image saved")
 #                 return predict(file_path)
-                image, cls_score_tensor, heat_map, bounding_box = get_prediction_and_heat_map(file_path)
-                probability = round(cls_score_tensor.cpu().numpy()[0][0]*100, 2)
+                image, cls_score, heat_map, bounding_box = get_prediction_and_heat_map(file_path)
+                probability = round(cls_score*100, 2)
                 predicted = True
-                print("redirecting to analysis_report page")
                 # Save images to folder for futher page rendering
                 filepath_image_original, filepath_image_bounding_box, filepath_image_heat_map = save_images(filename, image, heat_map, bounding_box)
                 # IF NORMAL THEN PLOT ONLY HEAT MAP
                 if probability < 50:
                     filepath_image_bounding_box = filepath_image_original
-                    message = "Model did not recognize any abnormalities in this image."
+                    message = "Model did not recognize abnormality on x-ray"
+                    message_color = 'green'
                 else:
-                    message = """Model recognized any abnormalities in this image.  
-                    Possible abnormal area is shaded by a rectangle"""
-                print("message:", message)
+                    message = "Model recognized abnormality on x-ray !"
+                    message_color = 'red'
+#                 print("message:", message)
                 return render_template('public/analysis_report_page.html', 
                                         filename                    = filename, 
                                         filepath_image_original     = filepath_image_original, 
                                         filepath_image_bounding_box = filepath_image_bounding_box,
                                         filepath_image_heat_map     = filepath_image_heat_map,
                                         probability                 = probability,
-                                        message                     = message)
+                                        message                     = message,
+                                        message_color               = message_color)
                     
 #                 return redirect(url_for("analysis_report", filename = filename, 
 #                                         filepath_image_original     = filepath_image_original, 
@@ -125,7 +124,7 @@ def save_images(filename, image, heat_map, bounding_box):
     x_scaled, y_scaled, w_scaled, h_scaled = (x + int(0.25*w), y + int(0.25*h), x + int(0.75*w), y + int(0.75*h))
     color = (36,255,12) # green
     cv2.rectangle(image_bounding_box, (x_scaled, y_scaled), (w_scaled, h_scaled), color, thickness=3)        
-    print("(x_scaled, y_scaled), (w_scaled, h_scaled):", (x_scaled, y_scaled), (w_scaled, h_scaled))
+#     print("(x_scaled, y_scaled), (w_scaled, h_scaled):", (x_scaled, y_scaled), (w_scaled, h_scaled))
     # save
     filepath_image_bounding_box = filename.split('.')[0]+'_bb.'+filename.split('.')[1]
     filepath_image_bounding_box = os.path.join(app.config["IMAGE_UPLOADS"], filename.split('.')[0], filepath_image_bounding_box)

@@ -7,15 +7,19 @@
 <body> 
 <div class="bd-example" align="middle">
 
+    <center> <img src= "{{ url_for('static', filename='static/graphics/Pallace_logo.png') }}", alt="logo"> </center>
 
- <h4><center> Anomality probability : {{probability}}% </center> </h4>
-    <h2><center> {{message}} </center></h2>
-<img src= "{{ url_for('static', filename=filepath_image_original) }}", alt="Original preprocessed maybe image">
-<img src= "{{ url_for('static', filename=filepath_image_heat_map) }}", alt="Heat map overlayed image">    
-
-    <br>
-    <h2><center> <a href='/'> Upload new X-RAY</a></center></h2>
+ 
+    <h2><center><p style="color:{{message_color}}">{{message}} </p></center></h2>
+    <h4><center> Anomaly probability : {{probability}}% </center> </h4>
     
+<img src= "{{ url_for('static', filename=filepath_image_original) }}", alt="Original preprocessed image">
+<img src= "{{ url_for('static', filename=filepath_image_heat_map) }}", alt="Heat map overlayed image">    
+    <br><br><br>
+    <form action="/">
+
+    <button class="blue button" style="font-size : 15px; width: 200px; height: 30px;">Upload new X-RAY </button>
+    </form>
     
     
         

@@ -14,7 +14,6 @@ class CAM(nn.Module):
         self.backbone = model_to_convert.features
         self.fc = get_fc_layer(model_to_convert)
         self.conv  =  nn.Conv2d(self.fc.in_features, self.fc.out_features, kernel_size=1)
-        print(self.conv)
         self.conv.weight = nn.Parameter(self.fc.weight.data.unsqueeze(-1).unsqueeze(-1))
         self.conv.bias = self.fc.bias
         self.score_fn = score_fn
@@ -56,7 +55,6 @@ def get_bb_from_heatmap(heat_map, thr_value=None, mean_value_mul=None):
     cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
     
-    print("len cnts:", len(cnts))
     list_boxes = []
     max_box_area = 0
     max_box_idx = 0
