@@ -1,5 +1,24 @@
+<<<<<<< HEAD
 
 
+=======
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pallace - Upload X-RAY</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='static/css/style.css') }}">
+    <script src="{{url_for('static', filename='static/js/upload_image.js')}}"></script>
+  </head>
+    
+
+
+    <center> <img src= "{{ url_for('static', filename='static/graphics/Pallace_logo.png') }}", alt="logo"> </center>
+    
+    
+    
+    
+    
+>>>>>>> first-stage
 <div class="container">
   <div class="row">
     <div class="col">
@@ -10,6 +29,7 @@
       <form action="/upload-image" method="POST" enctype="multipart/form-data">
 
         <div class="form-group">
+<<<<<<< HEAD
           <label>Select image</label>
           <div class="custom-file">
             <input type="file" class="custom-file-input" name="image" id="image">
@@ -18,6 +38,14 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Upload</button>
+=======
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" name="image" id="image">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+>>>>>>> first-stage
 
       </form>
 
@@ -25,3 +53,15 @@
   </div>
 </div>
 
+<<<<<<< HEAD
+=======
+    
+</html>
+
+
+
+
+
+
+
+>>>>>>> first-stage

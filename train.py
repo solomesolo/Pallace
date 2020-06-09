@@ -95,6 +95,10 @@ def train(criterion, model, optimizer, n_epochs, device, train_loader, val_loade
                     true_labels = labels.cpu().numpy()#np.squeeze(labels.cpu().numpy())
                     list_outputs.extend(outputs.tolist())
                     list_labels.extend(true_labels.tolist())
+<<<<<<< HEAD
+=======
+            print("validation list_outputs[:10]:", output.cpu().numpy()[:10], " labels: ", list_labels[:10])
+>>>>>>> first-stage
                     
         # shuffle train loader
         train_loader.dataset.shuffle_dataset()
@@ -129,7 +133,11 @@ def train(criterion, model, optimizer, n_epochs, device, train_loader, val_loade
             print (f"Validation Loss decreased from {valid_loss_min} to  {valid_loss} ....Saving model")
             valid_loss_min = valid_loss
             best_model_wts = copy.deepcopy(model.state_dict())
+<<<<<<< HEAD
         torch.save(model.state_dict(), 'models/model_{}px_epoch-{}_kappa-{}.pt'.format(str(INPUT_SIZE), str(epoch+3), str(round(kappa_score, 3))))
+=======
+        torch.save(model.state_dict(), 'models/model_{}px_epoch-{}_kappa-{}.pt'.format(str(INPUT_SIZE), str(epoch), str(round(kappa_score, 3))))
+>>>>>>> first-stage
         
             
         # free up memory

@@ -26,6 +26,22 @@ class Data(object):
         # add prefix path to dataset to images paths
         valid_df['FilePath'] = valid_df['FilePath'].apply(lambda x: DATA_PATH+x)
         return valid_df
+<<<<<<< HEAD
+=======
+    
+        
+    @property
+    def pallace_train_df(self):
+        # read csv
+        train_df = pd.read_csv(PALLACE_LABELS_PATH)#, header=None)#, names=['FilePath'])
+        return train_df
+
+    @property
+    def pallace_valid_df(self):
+        valid_df = pd.read_csv(PALLACE_LABELS_PATH)#, header=None)#, names=['FilePath'])
+        return valid_df
+    
+>>>>>>> first-stage
 
     @property
     def train_labels_data(self):

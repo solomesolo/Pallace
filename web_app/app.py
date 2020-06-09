@@ -1,23 +1,51 @@
+<<<<<<< HEAD
 from flask import Flask, jsonify, request, render_template, redirect
+=======
+from flask import Flask, jsonify, request, render_template, redirect, url_for
+>>>>>>> first-stage
 
 from werkzeug.utils import secure_filename
 import time
 from datetime import datetime
+<<<<<<< HEAD
+=======
+import os
+>>>>>>> first-stage
 import io
 from PIL import Image
 
 from predict import *
+<<<<<<< HEAD
 from preprocess import preprocess_image
 
 UPLOAD_FOLDER = 'uploaded_images'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
+=======
+# from preprocess import preprocess_image
+
+UPLOAD_FOLDER = 'static/uploaded_images'
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+
+print("__name__:", __name__)
+app = Flask(__name__)
+current_path = os.path.dirname(os.path.realpath(__file__))
+print("current_path:", current_path)
+app = Flask(__name__, static_folder=current_path)
+
+
+>>>>>>> first-stage
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config["IMAGE_UPLOADS"] = UPLOAD_FOLDER #"/mnt/c/wsl/projects/pythonise/tutorials/flask_series/app/app/static/img/uploads"
 app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["JPEG", "JPG", "PNG", "GIF"]
 app.config["MAX_IMAGE_FILESIZE"] = 5 * 1024 * 1024
+<<<<<<< HEAD
+=======
+RELATIVE_TEMPLATE_PATH = ''#'../../'
+
+>>>>>>> first-stage
 
 def allowed_image(filename):
     if not "." in filename:
@@ -37,8 +65,15 @@ def allowed_image_filesize(filesize):
     else:
         return False
 
+<<<<<<< HEAD
 @app.route("/upload-image", methods=["GET", "POST"])
 def upload_image():
+=======
+@app.route("/", methods=["GET", "POST"])
+@app.route("/upload-image", methods=["GET", "POST"])
+def upload_image():
+    predicted = False
+>>>>>>> first-stage
     if request.method == "POST":
         if request.files:
 #             if "filesize" in request.cookies:
@@ -58,6 +93,7 @@ def upload_image():
                 filename = secure_filename(image.filename)
                 now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = filename.split('.')[0] + '_' + now +'.' + filename.split('.')[1]
+<<<<<<< HEAD
                 file_path = os.path.join(app.config["IMAGE_UPLOADS"], filename)
                 image.save(file_path)
                 print("Image saved")
@@ -73,6 +109,135 @@ def upload_image():
         
     return render_template("public/upload_image.html")
 
+=======
+                os.makedirs(app.config["IMAGE_UPLOADS"] +'/'+ filename.split('.')[0])
+                file_path = os.path.join(app.config["IMAGE_UPLOADS"], filename.split('.')[0], filename)
+                image.save(file_path)
+                print("Image saved")
+#                 return predict(file_path)
+                image, cls_score, heat_map, bounding_box = get_prediction_and_heat_map(file_path)
+                probability = round(cls_score*100, 2)
+                predicted = True
+                # Save images to folder for futher page rendering
+                filepath_image_original, filepath_image_bounding_box, filepath_image_heat_map = save_images(filename, image, heat_map, bounding_box)
+                # IF NORMAL THEN PLOT ONLY HEAT MAP
+                if probability < 50:
+                    filepath_image_bounding_box = filepath_image_original
+                    message = "Model did not recognize abnormality on x-ray"
+                    message_color = 'green'
+                else:
+                    message = "Model recognized abnormality on x-ray !"
+                    message_color = 'red'
+#                 print("message:", message)
+                return render_template('public/analysis_report_page.html', 
+                                        filename                    = filename, 
+                                        filepath_image_original     = filepath_image_original, 
+                                        filepath_image_bounding_box = filepath_image_bounding_box,
+                                        filepath_image_heat_map     = filepath_image_heat_map,
+                                        probability                 = probability,
+                                        message                     = message,
+                                        message_color               = message_color)
+                    
+#                 return redirect(url_for("analysis_report", filename = filename, 
+#                                         filepath_image_original     = filepath_image_original, 
+#                                         filepath_image_bounding_box = filepath_image_bounding_box,
+#                                         filepath_image_heat_map     = filepath_image_heat_map,
+#                                         probability                 = probability))
+            else:
+                print("That file extension is not allowed")
+                return redirect(request.url)
+    if not predicted:
+        return render_template("public/upload_image.html")
+#     if predicted:
+#         pass
+
+def save_images(filename, image, heat_map, bounding_box):
+    # here draw images with prediction for report web page
+    filepath_image_original = filename.split('.')[0]+'_prepr.'+filename.split('.')[1]
+    filepath_image_original = os.path.join(app.config["IMAGE_UPLOADS"], filename.split('.')[0], filepath_image_original)
+    image_original = Image.fromarray(image)
+    image_original.save(filepath_image_original)
+    
+    # --- Image with bounding box
+    image_bounding_box = image.copy()
+    # scaling bounding box to 0.5 preserving center point
+    x,y,w,h = bounding_box
+    x_scaled, y_scaled, w_scaled, h_scaled = (x + int(0.25*w), y + int(0.25*h), x + int(0.75*w), y + int(0.75*h))
+    color = (36,255,12) # green
+    cv2.rectangle(image_bounding_box, (x_scaled, y_scaled), (w_scaled, h_scaled), color, thickness=3)        
+#     print("(x_scaled, y_scaled), (w_scaled, h_scaled):", (x_scaled, y_scaled), (w_scaled, h_scaled))
+    # save
+    filepath_image_bounding_box = filename.split('.')[0]+'_bb.'+filename.split('.')[1]
+    filepath_image_bounding_box = os.path.join(app.config["IMAGE_UPLOADS"], filename.split('.')[0], filepath_image_bounding_box)
+    
+    image_bounding_box = Image.fromarray(image_bounding_box)
+    image_bounding_box.save(filepath_image_bounding_box)
+    
+    
+    # --- Image with heat map overlayed
+    image_heat_map = image.copy()
+#     heat_map = np.repeat(heat_map[:, :, np.newaxis], 3, axis=2)
+#     image_heat_map = image[:,:,0]
+    heat_map = (heat_map*255/1.5).astype('uint8')
+    
+    # Apply colormap
+    colormap=cv2.COLORMAP_JET
+    heat_map = cv2.applyColorMap(heat_map, colormap)
+    heat_map = cv2.cvtColor(heat_map, cv2.COLOR_BGR2RGB)
+
+    
+#     def rgb(minimum, maximum, value): 
+#         minimum, maximum = float(minimum), float(maximum)
+#         ratio = 2 * (value-minimum) / (maximum - minimum)
+#         b = int(max(0, 255*(1 - ratio)))
+#         r = int(max(0, 255*(ratio - 1)))
+#         g = 255 - b - r
+#         return r, g, b
+    
+    alpha = 0.5
+    image_heat_map = cv2.addWeighted(heat_map, alpha, image_heat_map, 1-alpha, 0)
+    # save
+    filepath_image_heat_map = filename.split('.')[0]+'_map.'+filename.split('.')[1]
+    filepath_image_heat_map = os.path.join(app.config["IMAGE_UPLOADS"], filename.split('.')[0], filepath_image_heat_map)
+
+    image_heat_map = Image.fromarray(image_heat_map)
+    image_heat_map.save(filepath_image_heat_map)
+    
+    
+    return filepath_image_original, filepath_image_bounding_box, filepath_image_heat_map
+    
+  
+@app.route("/analysis_report_page/<filename>",  methods=['GET', 'POST'])
+def analysis_report(filename, filepath_image_original, filepath_image_bounding_box, filepath_image_heat_map, probability):
+    
+    if request.method == 'POST':
+        print(" RENDERING ANALYSIS")
+        return render_template('analysis_report_page.html', filename,  filepath_image_original, filepath_image_bounding_box, filepath_image_heat_map, probability)
+    
+    
+# @app.route("/analysis_report_page/<filename>",  methods=['GET', 'POST'])
+# def analysis_report(filename, image, probability, heat_map, bounding_box):
+#     print("\n\nFILENAME:", filename)
+#     # here draw images with prediction for report web page
+#     image_original = image#.copy()
+#     filepath_image_original = '/uploaded_images/{}'.format(filename)
+#     os.makedirs(filepath_image_original)
+#     cv2.imsave(image_original, filepath_image_original)
+    
+#     image_bounding_box = image.copy()
+#     # scaling bounding box to 0.5 preserving center point
+#     x,y,w,h = bounding_box
+#     x_scaled, y_scaled, w_scaled, h_scaled = (x + int(0.25*w), y + int(0.25*h), x + int(0.75*w), y + int(0.75*h))
+#     color = (36,255,12) # green
+#     cv2.rectangle(image_bounding_box, (x_scaled, y_scaled), (w_scaled, h_scaled), color, thickness=3)        
+    
+#     image_heat_map = image.copy()#         return render_template('analysis_report_page.html', filename, filepath_image_original, probability)#, filepath_image_bounding_box, filepath_image_heat_map, probability)
+
+#     image_heat_map = cv2.addWeighted(image_heat_map,0.5,heat_map,0.1,0)
+    
+#     if request.method == 'POST':
+                    
+>>>>>>> first-stage
 
 @app.route('/predict', methods=['POST'])
 def predict(file_path):
@@ -116,4 +281,8 @@ def predict(file_path):
 #             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     
 if __name__ == '__main__':
+<<<<<<< HEAD
     app.run()#debug=True)
+=======
+    app.run(debug=True)
+>>>>>>> first-stage
