@@ -1,28 +1,13 @@
-<<<<<<< HEAD
-from flask import Flask, jsonify, request, render_template, redirect
-=======
 from flask import Flask, jsonify, request, render_template, redirect, url_for
->>>>>>> first-stage
 
 from werkzeug.utils import secure_filename
 import time
 from datetime import datetime
-<<<<<<< HEAD
-=======
 import os
->>>>>>> first-stage
 import io
 from PIL import Image
 
 from predict import *
-<<<<<<< HEAD
-from preprocess import preprocess_image
-
-UPLOAD_FOLDER = 'uploaded_images'
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
-
-app = Flask(__name__)
-=======
 # from preprocess import preprocess_image
 
 UPLOAD_FOLDER = 'static/uploaded_images'
@@ -35,17 +20,13 @@ print("current_path:", current_path)
 app = Flask(__name__, static_folder=current_path)
 
 
->>>>>>> first-stage
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config["IMAGE_UPLOADS"] = UPLOAD_FOLDER #"/mnt/c/wsl/projects/pythonise/tutorials/flask_series/app/app/static/img/uploads"
 app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["JPEG", "JPG", "PNG", "GIF"]
 app.config["MAX_IMAGE_FILESIZE"] = 5 * 1024 * 1024
-<<<<<<< HEAD
-=======
 RELATIVE_TEMPLATE_PATH = ''#'../../'
 
->>>>>>> first-stage
 
 def allowed_image(filename):
     if not "." in filename:
@@ -65,15 +46,10 @@ def allowed_image_filesize(filesize):
     else:
         return False
 
-<<<<<<< HEAD
-@app.route("/upload-image", methods=["GET", "POST"])
-def upload_image():
-=======
 @app.route("/", methods=["GET", "POST"])
 @app.route("/upload-image", methods=["GET", "POST"])
 def upload_image():
     predicted = False
->>>>>>> first-stage
     if request.method == "POST":
         if request.files:
 #             if "filesize" in request.cookies:
@@ -93,23 +69,6 @@ def upload_image():
                 filename = secure_filename(image.filename)
                 now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = filename.split('.')[0] + '_' + now +'.' + filename.split('.')[1]
-<<<<<<< HEAD
-                file_path = os.path.join(app.config["IMAGE_UPLOADS"], filename)
-                image.save(file_path)
-                print("Image saved")
-                return predict(file_path)
-                
-#                 prediction = predict(file_path)
-#                 return render_template('public/result.html')
-
-#                 return redirect(request.url)
-            else:
-                print("That file extension is not allowed")
-                return redirect(request.url)
-        
-    return render_template("public/upload_image.html")
-
-=======
                 os.makedirs(app.config["IMAGE_UPLOADS"] +'/'+ filename.split('.')[0])
                 file_path = os.path.join(app.config["IMAGE_UPLOADS"], filename.split('.')[0], filename)
                 image.save(file_path)
@@ -237,7 +196,6 @@ def analysis_report(filename, filepath_image_original, filepath_image_bounding_b
     
 #     if request.method == 'POST':
                     
->>>>>>> first-stage
 
 @app.route('/predict', methods=['POST'])
 def predict(file_path):
@@ -281,8 +239,4 @@ def predict(file_path):
 #             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     
 if __name__ == '__main__':
-<<<<<<< HEAD
-    app.run()#debug=True)
-=======
     app.run(debug=True)
->>>>>>> first-stage
