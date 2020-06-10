@@ -1,43 +1,5 @@
-from grad_cam import *
-
-# Can work with any model, but it assumes that the model has a
-# feature method, and a classifier method,
-# as in the VGG models in torchvision.
-# model = models.resnet50(pretrained=True)
-img = np.transpose(images[0].numpy(), [1,2,0])
-print("img shape:", img.shape)
-feature_module = list(model.features.modules())[-50]#(by_name='denselayer32')
-feature_module = list(model.features.modules())[2]
-use_cuda = True
-
-# model_2.layer[0].weight
-
-grad_cam = GradCam(model=model, feature_module=feature_module, \
-                   target_layer_names=["densenet32"], use_cuda=use_cuda)
-
-# img = cv2.imread(args.image_path, 1)
-# img = np.float32(cv2.resize(img, (224, 224))) / 255
-input = preprocess_image(img)
-print("input:", input.shape)
-
-# If None, returns the map for the highest scoring category.
-# Otherwise, targets the requested index.
-target_index = None
-mask = grad_cam(input, target_index)
-
-show_cam_on_image(img, mask)
-
-gb_model = GuidedBackpropReLUModel(model=model, use_cuda=True)
-print(model._modules.items())
-gb = gb_model(input, index=target_index)
-gb = gb.transpose((1, 2, 0))
-cam_mask = cv2.merge([mask, mask, mask])
-cam_gb = deprocess_image(cam_mask*gb)
-gb = deprocess_image(gb)
-
-cv2.imwrite('gb.jpg', gb)
-cv2.imwrite('cam_gb.jpg', cam_gb)
-=======
+import cv2
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -123,4 +85,3 @@ def get_bb_from_heatmap(heat_map, thr_value=None, mean_value_mul=None):
     
         
     
->>>>>>> first-stage
