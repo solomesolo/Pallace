@@ -36,6 +36,6 @@ Prediction over study using 4 densenet-169 models ensemble:
 
 # Screenshots
 
-![Alt text](screenshot_images/screenshot_TP-1.png "Example-1")
+
 ![Alt text](screenshot_images/screenshot_TP-2.png "Example-2")
 ![Alt text](screenshot_images/screenshot_TP-3.png "Example-3")
